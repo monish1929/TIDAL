@@ -10,6 +10,8 @@ import {
   Microscope,
   Navigation,
   ShieldAlert,
+  Shield,
+  Siren,
   Settings,
 } from "lucide-react";
 import { TopicScope } from "@/types/decision";
@@ -77,6 +79,20 @@ export const SIDEBAR_NAV_ITEMS: NavItem[] = [
     shortLabel: "Zones",
     icon: ShieldAlert,
     primaryRole: "COASTAL_AUTHORITY",
+  },
+  {
+    id: "coastal-authority",
+    label: "Coastal Authority",
+    shortLabel: "Coastal",
+    icon: Shield,
+    primaryRole: "COASTAL_AUTHORITY",
+  },
+  {
+    id: "disaster-management",
+    label: "Disaster Management",
+    shortLabel: "Disaster",
+    icon: Siren,
+    primaryRole: "DISASTER_MANAGEMENT",
   },
   {
     id: "settings",

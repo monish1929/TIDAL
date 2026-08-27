@@ -46,6 +46,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     currentScope = "research";
   } else if (pathname?.startsWith("/dashboard/fishing")) {
     currentScope = "fishing";
+  } else if (pathname?.startsWith("/dashboard/coastal-authority")) {
+    currentScope = "coastal-authority";
+  } else if (pathname?.startsWith("/dashboard/disaster-management")) {
+    currentScope = "disaster-management";
   } else if (pathname === "/dashboard") {
     const scopeParam = searchParams.get("scope") as TopicScope | null;
     if (
@@ -59,6 +63,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         "research",
         "routes",
         "zones",
+        "coastal-authority",
+        "disaster-management",
         "settings",
       ].includes(scopeParam)
     ) {
@@ -89,6 +95,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       router.push("/dashboard/research");
     } else if (scope === "fishing") {
       router.push("/dashboard/fishing");
+    } else if (scope === "coastal-authority") {
+      router.push("/dashboard/coastal-authority");
+    } else if (scope === "disaster-management") {
+      router.push("/dashboard/disaster-management");
     } else {
       router.push(`/dashboard?scope=${scope}`);
     }

@@ -695,6 +695,18 @@ export const SCOPED_PROMPT_SUGGESTIONS: Record<TopicScope, string[]> = {
     "Show coastal authority jurisdiction borders and monitoring stations",
     "Are there active naval firing exercise zone restrictions today?",
   ],
+  "coastal-authority": [
+    "Summarize jurisdiction hazard status across coastal sectors",
+    "Compare hazard risk between Gulf of Mannar and Palk Strait",
+    "Generate 7-day administrative district briefing report",
+    "Check multi-sensor wave, wind, and lightning telemetry",
+  ],
+  "disaster-management": [
+    "Track active cyclone trajectory and estimated landfall timing",
+    "Assess harbour and vessel exposure in projected hazard path",
+    "Draft multilingual emergency advisory bulletin (Tamil + Hindi)",
+    "Review coastal evacuation timeline and shelter proximity",
+  ],
   settings: [
     "How do I update my boat size or fishing range?",
     "Switch my default language preference",

@@ -43,6 +43,14 @@ const FishingLandingView = dynamic(
   () => import("@/components/fishing/fishing-landing-view").then((m) => m.FishingLandingView),
   { ssr: false, loading: () => <WorkspaceSkeleton /> }
 );
+const CoastalAuthorityLanding = dynamic(
+  () => import("@/components/coastal-authority/coastal-authority-landing").then((m) => m.CoastalAuthorityLanding),
+  { ssr: false, loading: () => <WorkspaceSkeleton /> }
+);
+const DisasterManagementLanding = dynamic(
+  () => import("@/components/disaster-management/disaster-management-landing").then((m) => m.DisasterManagementLanding),
+  { ssr: false, loading: () => <WorkspaceSkeleton /> }
+);
 const CopilotWorkspace = dynamic(
   () => import("@/components/dashboard/copilot-workspace").then((m) => m.CopilotWorkspace),
   { ssr: false, loading: () => <WorkspaceSkeleton /> }
@@ -92,10 +100,16 @@ function MainDashboardContent() {
 
       {scopeParam === "fishing" && <FishingLandingView />}
 
+      {scopeParam === "coastal-authority" && <CoastalAuthorityLanding />}
+
+      {scopeParam === "disaster-management" && <DisasterManagementLanding />}
+
       {scopeParam !== "home" &&
         scopeParam !== "chat" &&
         scopeParam !== "research" &&
-        scopeParam !== "fishing" && (
+        scopeParam !== "fishing" &&
+        scopeParam !== "coastal-authority" &&
+        scopeParam !== "disaster-management" && (
           <CopilotWorkspace
             currentScope={scopeParam}
             userProfile={userProfile}

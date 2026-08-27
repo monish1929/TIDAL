@@ -12,6 +12,8 @@ export type TopicScope =
   | "research"
   | "routes"
   | "zones"
+  | "coastal-authority"
+  | "disaster-management"
   | "settings";
 
 export type DataSource =
