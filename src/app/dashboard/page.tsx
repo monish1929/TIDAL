@@ -93,6 +93,7 @@ function MainDashboardContent() {
         <ChatWorkspace
           userProfile={userProfile}
           researchMode={false}
+          activeDecision={activeDecision}
         />
       )}
 

@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/genai": "^2.19.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "groq-sdk": "^1.6.0",
     "lucide-react": "^1.16.0",
     "maplibre-gl": "^6.6.0",
     "next": "^15.1.0",

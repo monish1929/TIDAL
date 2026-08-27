@@ -111,9 +111,10 @@ export const CopilotWorkspace: React.FC<CopilotWorkspaceProps> = ({
   const activeSuggestions =
     SCOPED_PROMPT_SUGGESTIONS[currentScope] || SCOPED_PROMPT_SUGGESTIONS.home;
 
-  const handleSendQuery = (textToSend?: string) => {
+  const handleSendQuery = async (textToSend?: string) => {
     const query = (textToSend || inputQuery).trim();
-    if (!query) return;
+
+    if (!query || isThinking) return;
 
     const userMsg: MessageItem = {
       id: "msg_u_" + Date.now(),
@@ -126,136 +127,66 @@ export const CopilotWorkspace: React.FC<CopilotWorkspaceProps> = ({
     setInputQuery("");
     setIsThinking(true);
 
-    setTimeout(() => {
-      let responseDecision: DecisionResponse;
-      const lower = query.toLowerCase();
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query,
+          role: userProfile.role,
+          language: "English",
+        }),
+      });
 
-      if (
-        lower.includes("safe") ||
-        lower.includes("venture") ||
-        lower.includes("tomorrow")
-      ) {
-        responseDecision = {
-          ...FLAGSHIP_TRIP_SAFETY_MOCK,
-          id: "dec_" + Date.now(),
-          query: query,
-          timestamp: new Date().toISOString(),
-        };
-      } else if (
-        lower.includes("emergency") ||
-        lower.includes("cyclone") ||
-        lower.includes("recall") ||
-        lower.includes("warning")
-      ) {
-        responseDecision = {
-          ...HIGH_RISK_GATED_MOCK,
-          id: "dec_hr_" + Date.now(),
-          query: query,
-          timestamp: new Date().toISOString(),
-        };
-      } else {
-        responseDecision = {
-          id: "dec_dyn_" + Date.now(),
-          query: query,
-          timestamp: new Date().toISOString(),
-          scope: currentScope,
-          recommendation: researchMode
-            ? `RESEARCH SYNTHESIS: Multi-Source Temporal Correlation for "${query}"`
-            : `DECISION INTELLIGENCE: Evidence-Based Recommendation for "${query}"`,
-          summaryRationale: researchMode
-            ? "Integrated 30-day historical time-series from INCOIS and ISRO Sentinel-3. High confidence correlation observed across physical anomalies."
-            : `Synthesized current ocean state forecasts, IMD weather bulletins, and small vessel safety envelopes for ${userProfile.role.replace(
-                /_/g,
-                " "
-              )}.`,
-          riskTier: "LOW",
-          confidenceScore: 94,
-          approvalStatus: "APPROVED_AUTONOMOUS",
-          validityPeriod: {
-            validFrom: "Current Window",
-            validUntil: "Next 12 Hours",
-            recheckRecommendedAt: "Today 18:00 IST",
-          },
-          keyEvidence: [
-            {
-              id: "dyn_1",
-              label: "Significant Wave State",
-              value: 1.3,
-              unit: "m",
-              confidence: 0.95,
-              source: "INCOIS_OSF",
-              timestamp: "12 mins ago",
-              status: "optimal",
-            },
-            {
-              id: "dyn_2",
-              label: "Surface Wind Vector",
-              value: 14,
-              unit: "kts",
-              confidence: 0.92,
-              source: "IMD_BULLETIN",
-              timestamp: "30 mins ago",
-              status: "optimal",
-            },
-            {
-              id: "dyn_3",
-              label: "Satellite Sensor Verification",
-              value: "Optimal Coverage",
-              unit: "",
-              confidence: 0.97,
-              source: "ISRO_EOS",
-              timestamp: "1 hour ago",
-              status: "optimal",
-            },
-          ],
-          causalExplanation: {
-            primaryDrivers: [
-              "Favorable boundary layer stability across sector",
-              "Nominal thermocline depth suppressing turbulence",
-            ],
-            narrative: researchMode
-              ? "Longitudinal analysis reveals seasonal sea surface temperature anomalies are within 1-sigma historical variance, indicating stable baseline dynamics."
-              : "Localized sea condition indicators remain well inside safe operating margins for your configured craft.",
-          },
-          counterfactuals: [
-            {
-              id: "dyn_cf_1",
-              scenarioName: "Primary Recommended Track",
-              description: "Standard operating envelope",
-              parameters: { speed: "10 kts", buffer: "4 NM" },
-              predictedOutcome: "Optimal efficiency, zero hazard exposure.",
-              riskScore: 15,
-              riskTier: "LOW",
-              recommended: true,
-            },
-          ],
-          criticalUncertainty: {
-            variable: "Localized Thermal Wind Escalation",
-            threshold: "> 20 knots",
-            impactDescription: "Standard diurnal variation.",
-          },
-          timeSeriesData: [
-            { time: "06:00", waveHeight: 1.1, windSpeed: 11, sst: 28.3 },
-            { time: "10:00", waveHeight: 1.3, windSpeed: 13, sst: 28.5 },
-            { time: "14:00", waveHeight: 1.8, windSpeed: 18, sst: 28.8 },
-            { time: "18:00", waveHeight: 1.5, windSpeed: 15, sst: 28.6 },
-          ],
-        };
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          typeof data?.error === "string"
+            ? data.error
+            : `API request failed with status ${res.status}`
+        );
+      }
+
+      const responseText =
+        typeof data?.text === "string"
+          ? data.text.trim()
+          : "";
+
+      if (!responseText) {
+        throw new Error("API returned an empty response.");
       }
 
       const copilotMsg: MessageItem = {
         id: "msg_c_" + Date.now(),
         sender: "copilot",
         timestamp: "Just now",
-        decision: responseDecision,
+        text: responseText,
       };
 
       setMessages((prev) => [...prev, copilotMsg]);
-      setIsThinking(false);
-      onDecisionActivated(responseDecision);
-    }, 450);
-  };
 
+    } catch (error) {
+      console.error("Copilot request failed:", error);
+
+      const errorMessage: MessageItem = {
+        id: "msg_error_" + Date.now(),
+        sender: "copilot",
+        timestamp: "Just now",
+        text:
+          error instanceof Error
+            ? `Unable to get a TIDAL response: ${error.message}`
+            : "Unable to get a TIDAL response.",
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+
+    } finally {
+      setIsThinking(false);
+    }
+  };
   const handleApproveAdvisory = (decisionId: string) => {
     setMessages((prev) =>
       prev.map((msg) => {
